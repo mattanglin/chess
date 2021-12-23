@@ -1,107 +1,96 @@
+export type KingType = 'K';
+export type QueenType = 'Q';
+export type BishopType = 'B';
+export type KnightType = 'N';
+export type RookType = 'R';
+export type PawnType = 'P';
+export type ChessPieceType = KingType | QueenType | BishopType | KnightType | RookType | PawnType;
+export type WhitePlayerType = 'W';
+export type BlackPlayerType = 'B';
+export type ChessPlayer = WhitePlayerType | BlackPlayerType;
+export type WhiteKingType = 'WK';
+export type WhiteQueenType = 'WQ';
+export type WhiteBishopType = 'WB';
+export type WhiteKnightType = 'WN';
+export type WhiteRookType = 'WR';
+export type WhitePawnType = 'WP';
+export type BlackKingType = 'BK';
+export type BlackQueenType = 'BQ';
+export type BlackBishopType = 'BB';
+export type BlackKnightType = 'BN';
+export type BlackRookType = 'BR';
+export type BlackPawnType = 'BP';
+export type ChessPiece = 
+  | WhiteKingType | WhiteQueenType | WhiteBishopType | WhiteKnightType | WhiteRookType | WhitePawnType
+  | BlackKingType | BlackQueenType | BlackBishopType | BlackKnightType | BlackRookType | BlackPawnType;
+export type WhitePiece = WhiteKingType | WhiteQueenType | WhiteBishopType | WhiteKnightType | WhiteRookType | WhitePawnType;
+export type BlackPiece = BlackKingType | BlackQueenType | BlackBishopType | BlackKnightType | BlackRookType | BlackPawnType;
+export type OptionalPiece = ChessPiece | undefined;
+export type ChessBoard = [
+  [OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece],
+  [OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece],
+  [OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece],
+  [OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece],
+  [OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece],
+  [OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece],
+  [OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece],
+  [OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece, OptionalPiece],
+];
 
-export type Player = 'white' | 'black';
-export type PieceType = 'Pawn' | 'Rook' | 'Knight' | 'Bishop' | 'Queen' | 'King';
-export type PromotionPieceType = 'Rook' | 'Knight' | 'Bishop' | 'Queen';
-export type PieceSide = 'K' | 'Q';
+export type TileRank = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8';
+export type TileFile = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h';
+export type TileIndex = number;
+export type TileFileIndex = TileIndex;
+export type TileRankIndex = TileIndex;
+export type TileFileType = 'file' | 'index';
+export type TileRankType = 'rank' | 'index';
+export type TileId =
+  | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'h7' | 'h8'
+  | 'g1' | 'g2' | 'g3' | 'g4' | 'g5' | 'g6' | 'g7' | 'g8'
+  | 'f1' | 'f2' | 'f3' | 'f4' | 'f5' | 'f6' | 'f7' | 'f8'
+  | 'e1' | 'e2' | 'e3' | 'e4' | 'e5' | 'e6' | 'e7' | 'e8'
+  | 'd1' | 'd2' | 'd3' | 'd4' | 'd5' | 'd6' | 'd7' | 'd8'
+  | 'c1' | 'c2' | 'c3' | 'c4' | 'c5' | 'c6' | 'c7' | 'c8'
+  | 'b1' | 'b2' | 'b3' | 'b4' | 'b5' | 'b6' | 'b7' | 'b8'
+  | 'a1' | 'a2' | 'a3' | 'a4' | 'a5' | 'a6' | 'a7' | 'a8';
+export type TileTuple = [TileFile, TileRank];
+export type TileObject = { file: TileFile; rank: TileRank };
+export type TileIndecesObject = { file: TileFileIndex; rank: TileRankIndex };
+export type TileIndecesTuple = [TileFileIndex, TileRankIndex];
+export type TileType = TileId | TileTuple | TileObject | TileIndecesObject | TileIndecesTuple;
+export type TileConversionType = 'id' | 'object' | 'tuple' | 'indeces-object' | 'indeces-tuple';
 
-
-export interface ChessPiece {
-  // Which player controls this piece
-  player: Player;
-  // The type for the piece
-  type: PieceType;
-  // Whether the piece was originall King side or Queen side (applies to 'Rook'|'Knight'|'Bishop' pieces)
-  side?: PieceSide;
-  // TODO: History of moves for this piece?
-  // moves: any[]; 
-}
-
-export interface ChessBoard {
-  
-  a1?: ChessPiece;
-  a2?: ChessPiece;
-  a3?: ChessPiece;
-  a4?: ChessPiece;
-  a5?: ChessPiece;
-  a6?: ChessPiece;
-  a7?: ChessPiece;
-  a?: ChessPiece;
-  
-  b1?: ChessPiece;
-  b2?: ChessPiece;
-  b3?: ChessPiece;
-  b4?: ChessPiece;
-  b5?: ChessPiece;
-  b6?: ChessPiece;
-  b7?: ChessPiece;
-  b?: ChessPiece;
-  
-  c1?: ChessPiece;
-  c2?: ChessPiece;
-  c3?: ChessPiece;
-  c4?: ChessPiece;
-  c5?: ChessPiece;
-  c6?: ChessPiece;
-  c7?: ChessPiece;
-  c?: ChessPiece;
-  
-  d1?: ChessPiece;
-  d2?: ChessPiece;
-  d3?: ChessPiece;
-  d4?: ChessPiece;
-  d5?: ChessPiece;
-  d6?: ChessPiece;
-  d7?: ChessPiece;
-  d?: ChessPiece;
-  
-  e1?: ChessPiece;
-  e2?: ChessPiece;
-  e3?: ChessPiece;
-  e4?: ChessPiece;
-  e5?: ChessPiece;
-  e6?: ChessPiece;
-  e7?: ChessPiece;
-  e?: ChessPiece;
-  
-  f1?: ChessPiece;
-  f2?: ChessPiece;
-  f3?: ChessPiece;
-  f4?: ChessPiece;
-  f5?: ChessPiece;
-  f6?: ChessPiece;
-  f7?: ChessPiece;
-  f?: ChessPiece;
-  
-  g1?: ChessPiece;
-  g2?: ChessPiece;
-  g3?: ChessPiece;
-  g4?: ChessPiece;
-  g5?: ChessPiece;
-  g6?: ChessPiece;
-  g7?: ChessPiece;
-  g?: ChessPiece;
-  
-  h1?: ChessPiece;
-  h2?: ChessPiece;
-  h3?: ChessPiece;
-  h4?: ChessPiece;
-  h5?: ChessPiece;
-  h6?: ChessPiece;
-  h7?: ChessPiece;
-  h?: ChessPiece;
-}
-
-export type BoardTile = keyof ChessBoard;
-
+/**
+ * TODO: Expand this to handle the following:
+ * - capture
+ * - promotion
+ * - player?
+ */
 export interface ChessMove {
-  from: BoardTile;
-  to: BoardTile;
-  capture?: boolean;
-  promoteTo?: PromotionPieceType;
+  from: TileId;
+  to: TileId;
+  // TODO: Expand
 }
 
-export interface ChessGame {
-  startingBoard: ChessBoard;
-  startingPlayer: Player;
-  moves: ChessMove[];
+
+/**
+ * Move Types
+ */
+ export interface MoveFuncParams {
+  board: ChessBoard;
+  tile: TileType;
+  length?: 1 | 7;
+  // TODO: Other possible things like promotion piece?
 }
+
+export interface ValidateMoveParams {
+  board: ChessBoard;
+  move: ChessMove;
+}
+export type MoveFunc = (params: MoveFuncParams) => ChessMove[];
+
+/**
+ * Render Types
+ */
+ export type RenderObject = Record<ChessPiece, string>;
+ export type RenderType = 'symbol' | 'text';

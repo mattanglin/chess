@@ -6,12 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "chess": "ts-node src/scripts/chess.ts"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^1.7.1",
+    "grommet": "^2.19.1",
     "next": "12.0.7",
+    "polished": "^4.1.3",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "react-redux": "^7.2.6",
+    "styled-components": "^5.3.3"
   },
   "devDependencies": {
     "@types/react": "17.0.37",
