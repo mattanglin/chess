@@ -57,7 +57,7 @@ import {
    // Rank 4
    [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
    // Rank 3
-   [undefined, undefined, WhiteBishop, undefined, undefined, undefined, undefined, undefined],
+   [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
    // Rank 2
    [WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn],
    // Rank 1

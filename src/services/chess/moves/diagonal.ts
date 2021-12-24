@@ -4,7 +4,7 @@ import { MoveFunc, ChessMove } from '../types';
 export const diagonal: MoveFunc = ({ board, tile, length = 7 }) => {
   const tileId = Chess.tile(tile, 'id');
   const pos = Chess.tile(tileId);
-  const { player } = Chess.piece(Chess.get(board, tileId)!);
+  const { player } = Chess.piece(Chess.get({ board, tile: tileId })!);
 
   const moves: ChessMove[] = [];
 
@@ -18,7 +18,7 @@ export const diagonal: MoveFunc = ({ board, tile, length = 7 }) => {
     // NW
     const nw = { rank: pos.rank + i, file: pos.file + i };
     if (!blocked.nw) {
-      const piece = Chess.get(board, nw);
+      const piece = Chess.get({ board, tile: nw });
 
       // Is this a valid tile?
       if (nw.rank < 8 && nw.file < 8 && (!piece || Chess.piece(piece).player !== player)) {
@@ -34,7 +34,7 @@ export const diagonal: MoveFunc = ({ board, tile, length = 7 }) => {
     // SW
     const sw = { rank: pos.rank - i, file: pos.file + i };
     if (!blocked.sw) {
-      const piece = Chess.get(board, sw);
+      const piece = Chess.get({ board, tile: sw });
       // Is this a valid tile?
       if (sw.rank >= 0 && sw.file < 8 && (!piece || Chess.piece(piece).player !== player)) {
         moves.push({ from: tileId, to: Chess.tile(sw) });
@@ -49,7 +49,7 @@ export const diagonal: MoveFunc = ({ board, tile, length = 7 }) => {
     // SE
     const se = { rank: pos.rank - i, file: pos.file - i };
     if (!blocked.se) {
-      const piece = Chess.get(board, se);
+      const piece = Chess.get({ board, tile: se });
       // Is this a valid tile?
       if (se.rank > -1 && se.file > -1 && (!piece || Chess.piece(piece).player !== player)) {
         moves.push({ from: tileId, to: Chess.tile(se) });
@@ -64,7 +64,7 @@ export const diagonal: MoveFunc = ({ board, tile, length = 7 }) => {
     // NE
     const ne = { rank: pos.rank + i, file: pos.file - i };
     if (!blocked.ne) {
-      const piece = Chess.get(board, ne);
+      const piece = Chess.get({ board, tile: ne });
       // Is this a valid tile?
       if (ne.file > -1 && ne.rank < 8 && (!piece || Chess.piece(piece).player !== player)) {
         moves.push({ from: tileId, to: Chess.tile(ne) });

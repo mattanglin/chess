@@ -5,7 +5,7 @@ export interface ContainerProps extends BoxTypes {}
 
 export const Container = (props: ContainerProps) => (
   <Box
-    width={{ max: 'xlarge' }}
+    width={{ max: 'large' }}
     fill="horizontal"
     align="center"
     {...props}

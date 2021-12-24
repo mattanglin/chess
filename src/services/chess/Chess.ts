@@ -4,6 +4,8 @@ import {
   ChessPiece,
   ChessPieceType,
   ChessMove,
+  MoveParams,
+  TravelParams,
   ChessPlayer,
   TileFile,
   TileFileType,
@@ -32,6 +34,7 @@ import {
   WhitePlayer,
   BlackPlayer,
 } from './constants';
+import { PopParams } from '.';
 
 
 
@@ -148,28 +151,30 @@ export class Chess {
   }
 
   /**
-   * Return possible piece at board tile position
+   * Helper to get the next player
    */
-  public static get = (board: ChessBoard, tile: TileType) => {
-    const pos = Chess.tile(tile, 'indeces-object');
-    return board[pos.rank][pos.file];
-  }
+  public static nextPlayer = (player: ChessPlayer) => player === WhitePlayer ? BlackPlayer : WhitePlayer;
 
   /**
-   * Validate and perform move on board.
-   * Returns resulting board after move.
+   * Return possible piece at board tile position
    */
-  public static move = (board: ChessBoard, move: ChessMove): ChessBoard => {
-    // TODO: Handle move
+  public static get = ({ board, tile }: { board: ChessBoard; tile: TileType }) => {
+    const pos = Chess.tile(tile, 'indeces-object');
+    return board[pos.rank]?.[pos.file];
+  }
+
+  public static set = ({ board, tile, piece }: { board: ChessBoard; tile: TileType; piece?: ChessPiece }) => {
+    const pos = Chess.tile(tile, 'indeces-object');
+    board[pos.rank][pos.file] = piece;
     return board;
   }
 
   /**
    * Get available moves for piece at tile position
    */
-  public static getAvailableMoves = (board: ChessBoard, tile: TileType): ChessMove[] => {
+  public static getAvailableMoves = ({ board, tile }: { board: ChessBoard; tile: TileType }): ChessMove[] => {
     const availableMoves: ChessMove[] = [];
-    const tileContent = Chess.get(board, tile);
+    const tileContent = Chess.get({ board, tile });
 
     if (!tileContent) throw new Error(`Cannot determine moves for empty tile "${Chess.tile(tile, 'id')}"`);
     
@@ -202,6 +207,104 @@ export class Chess {
   }
 
   /**
+   * Validates whether a move is legal or not.
+   * Throws error on invalid move.
+   */
+  public static validateMove = ({ board, move, player }: MoveParams): ChessMove => {
+    const tilePiece = Chess.get({ board, tile: move.from });
+
+    // Is there a piece here?
+    if (!tilePiece) throw new Error(`Cannot move piece from empty tile "${move.from}"`);
+    
+    // Is this the correct player?
+    const piece = Chess.piece(tilePiece);
+    if (piece.player !== player) throw new Error(`Cannot move other players piece at tile "${move.from}"`);
+
+    // Get all possible legal moves for this piece and check that this is one of those moves
+    const moves = Chess.getAvailableMoves({ board, tile: move.from });
+    
+    const verifiedMove = moves.find((mv) => mv.from === move.from && mv.to === mv.to);
+
+    if (!verifiedMove) throw new Error(`Invalid move of piece ${tilePiece} from tile "${move.from}" to "${move.to}"`)
+
+    // TODO: Pass along promotion as necessary
+
+    // Is the player currently in check?
+    // Is the player now out of check?
+    // Will this be covered by the available moves eventually? Probably
+    return verifiedMove;
+  }
+
+  
+  /**
+   * Validate and perform move on board.
+   * Returns resulting board after move.
+   */
+   public static move = ({ board, move, player }: MoveParams) => {
+     const verifiedMove = Chess.validateMove({ board, move, player });
+     const piece = Chess.get({ board, tile: move.from });
+
+    //  Move piece
+    Chess.set({ board, tile: move.from });
+    Chess.set({ board, tile: move.to, piece });
+
+    // Toggle Player
+    const nextPlayer = player === WhitePlayer ? BlackPlayer : WhitePlayer;
+
+    return {
+      board,
+      move: verifiedMove,
+      player: nextPlayer,
+    };
+  }
+
+  /**
+   * Add a number of moves all at once to get the resulting board
+   */
+  public static travel = ({ board, moves = [], player, validate = false }: TravelParams) => {
+    const firstMovePiece = Chess.get({ board, tile: moves[0].from });
+    let currentPlayer = player || Chess.piece(firstMovePiece!).player;
+
+    moves.forEach((move) => {
+      if (validate) {
+        const verifiedMove = Chess.validateMove({ board, move, player: currentPlayer });
+      }
+
+      const piece = Chess.get({ board, tile: move.from });
+      Chess.set({ board, tile: move.from });
+      Chess.set({ board, tile: move.to, piece });
+
+      // Toggle current player
+      currentPlayer = Chess.nextPlayer(currentPlayer);
+    })
+
+    return {
+      board,
+      player: currentPlayer,
+      moves,
+    }
+  }
+
+  /**
+   * Pop moves off the move stack and return the board to previous states
+   */
+  public static pop = ({
+    board,
+    moves = [],
+    count = 1,
+  }: PopParams) => {
+    for (let i = 0; i < count && moves.length; i++) {
+      const move = moves.pop()!;
+      const piece = Chess.get({ board, tile: move.to }) as ChessPiece;
+      const moveingPiece = move.pawnPromotion ? `${Chess.piece(piece).player}${PawnPiece}` as ChessPiece : piece;
+      const replacedPiece = move.capture;
+
+      Chess.set({ board, tile: move.from, piece: moveingPiece })
+      Chess.set({ board, tile: move.to, piece: replacedPiece });
+    }
+  }
+
+  /**
    * GETTERS / SETTERS
    * TODO:
    * - getter for board
@@ -229,7 +332,17 @@ export class Chess {
   /**
    * Return possible piece at board tile position
    */
-  public get = (tile: TileType) => Chess.get(this._board, tile);
+  public get = (tile: TileType) => Chess.get({ board: this._board, tile });
+
+  /**
+   * Set piece on board tile
+   */
+  public set = ({ tile, piece }: { tile: TileType; piece?: ChessPiece }) => Chess.set({ tile, piece, board: this._board });
+
+  /**
+   * Validate move
+   */
+  public validateMove = (move: ChessMove) => Chess.validateMove({ move, board: this._board, player: this._player });
 
   /**
    * Validate and perform move on board.
@@ -237,12 +350,12 @@ export class Chess {
    * Returns resulting board after move.
    */
   public move = (move: ChessMove) => {
-    const resultBoard = Chess.move(this._board, move);
-    this._moves.push(move);
-    this._player = this._player === WhitePlayer ? BlackPlayer : WhitePlayer;
+    const result = Chess.move({ move, board: this._board, player: this._player });
+    this._moves.push(result.move);
+    this._player = result.player;
     // TODO: Update Status?
   }
 
-  public getAvailableMoves = (tile: TileType) => Chess.getAvailableMoves(this._board, tile);
+  public getAvailableMoves = (tile: TileType) => Chess.getAvailableMoves({ board: this._board, tile });
 
 }

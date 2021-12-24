@@ -69,13 +69,50 @@ export type TileConversionType = 'id' | 'object' | 'tuple' | 'indeces-object' | 
 export interface ChessMove {
   from: TileId;
   to: TileId;
+  capture?: ChessPiece
+  pawnPromotion?: ChessPiece;
   // TODO: Expand
+  // TODO: Special attribute for en passant?
 }
-
+export type WhiteToPlayStatus = 'WhiteToPlay';
+export type BlackToPlayStatus = 'BlackToPlay';
+export type WhiteInCheckStatus = 'WhiteInCheck';
+export type BlackInCheckStatus = 'BlackInCheck';
+export type WhiteInCheckmateStatus = 'WhiteInCheckmate';
+export type BlackInCheckmateStatus = 'BlackInCheckmate';
+export type WhiteInStalemateStatus = 'WhiteInStalemate';
+export type BlackInStalemateStatus = 'BlackInStalemate';
+export type GameStatus =
+  | WhiteToPlayStatus
+  | BlackToPlayStatus
+  | WhiteInCheckStatus
+  | BlackInCheckStatus
+  | WhiteInCheckmateStatus
+  | BlackInCheckmateStatus
+  | WhiteInStalemateStatus
+  | BlackInStalemateStatus;
 
 /**
  * Move Types
  */
+export interface MoveParams {
+  board: ChessBoard;
+  move: ChessMove;
+  player: ChessPlayer;
+}
+
+export interface TravelParams {
+  board: ChessBoard;
+  moves: ChessMove[];
+  player?: ChessPlayer;
+  validate?: boolean;
+}
+
+export interface PopParams {
+  board: ChessBoard;
+  moves: ChessMove[];
+  count?: number;
+}
  export interface MoveFuncParams {
   board: ChessBoard;
   tile: TileType;

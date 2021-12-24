@@ -13,7 +13,7 @@ export const knight: MoveFunc = ({ board, tile }) => {
   // Get current tile indeces
   const tileId = Chess.tile(tile, 'id');
   const pos = Chess.tile(tileId, 'indeces-object');
-  const piece = Chess.get(board, tileId)!;
+  const piece = Chess.get({ board, tile: tileId })!;
   const { player } = Chess.piece(piece);
 
   const knightMovementTiles = [
@@ -33,7 +33,7 @@ export const knight: MoveFunc = ({ board, tile }) => {
     if (rank < 0 || rank > 7 || file < 0 || file > 7) return false;
 
     // Filter out tiles that are inhabited by your own piece
-    const targetPiece = Chess.get(board, [file, rank]);
+    const targetPiece = Chess.get({ board, tile: [file, rank] });
     if (targetPiece && Chess.piece(targetPiece).player === player) return false;
 
     // TODO: Handle other invalid moves

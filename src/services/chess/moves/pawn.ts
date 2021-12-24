@@ -16,7 +16,7 @@ import { WhitePlayer } from '../constants';
 export const pawn: MoveFunc = ({ board, tile }) => {
   const tileId = Chess.tile(tile, 'id');
   const pos = Chess.tile(tileId, 'indeces-object');
-  const piece = Chess.get(board, tileId)!;
+  const piece = Chess.get({ board, tile: tileId })!;
   const { player } = Chess.piece(piece);
 
   const dir = player === WhitePlayer ? -1 : 1;
@@ -26,7 +26,7 @@ export const pawn: MoveFunc = ({ board, tile }) => {
   
   // Basic 1 tile move
   const fwd = { rank: pos.rank + dir, file: pos.file };
-  const blocked = !!Chess.get(board, fwd);
+  const blocked = !!Chess.get({ board, tile: fwd });
   
   if (!blocked) {
     moves.push({ from: tileId, to: Chess.tile(fwd) });
@@ -38,7 +38,7 @@ export const pawn: MoveFunc = ({ board, tile }) => {
   // First move 2
   if (pos.rank === startingRank && !blocked) {
     const fwd2 = { rank: pos.rank + (2 * dir), file: pos.file };
-    const blocked = !!Chess.get(board, fwd2);
+    const blocked = !!Chess.get({ board, tile: fwd2 });
 
     if (!blocked) {
       moves.push({ from: tileId, to: Chess.tile(fwd2) });
@@ -47,7 +47,7 @@ export const pawn: MoveFunc = ({ board, tile }) => {
 
   // Capture Left
   const left = { rank: pos.rank + dir, file: pos.file - dir };
-  const leftPiece = Chess.get(board, left);
+  const leftPiece = Chess.get({ board, tile: left });
   
   if (leftPiece && Chess.piece(leftPiece).player !== player) {
     moves.push({ from: tileId, to: Chess.tile(left) });
@@ -55,7 +55,7 @@ export const pawn: MoveFunc = ({ board, tile }) => {
 
   // Capture Right
   const right = { rank: pos.rank + dir, file: pos.file + dir };
-  const rightPiece = Chess.get(board, right);
+  const rightPiece = Chess.get({ board, tile: right });
   if (rightPiece && Chess.piece(rightPiece).player !== player) {
     moves.push({ from: tileId, to: Chess.tile(right) });
   }

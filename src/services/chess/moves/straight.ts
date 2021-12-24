@@ -7,7 +7,7 @@ import { MoveFunc, ChessMove } from '../types';
 export const straight: MoveFunc = ({ board, tile, length = 7 }) => {
   const tileId = Chess.tile(tile, 'id');
   const pos = Chess.tile(tileId);
-  const { player } = Chess.piece(Chess.get(board, tileId)!);
+  const { player } = Chess.piece(Chess.get({ board, tile: tileId })!);
 
   const moves: ChessMove[] = [];
 
@@ -21,7 +21,7 @@ export const straight: MoveFunc = ({ board, tile, length = 7 }) => {
     // Top
     const top = { rank: pos.rank + i, file: pos.file };
     if (!blocked.top) {
-      const piece = Chess.get(board, top);
+      const piece = Chess.get({ board, tile: top });
 
       // Is this a valid tile?
       if (top.rank < 8 && (!piece || Chess.piece(piece).player !== player)) {
@@ -37,7 +37,7 @@ export const straight: MoveFunc = ({ board, tile, length = 7 }) => {
     // Right
     const right = { rank: pos.rank, file: pos.file + i };
     if (!blocked.right) {
-      const piece = Chess.get(board, right);
+      const piece = Chess.get({ board, tile: right });
 
       // Is this a valid tile?
       if (right.file < 8 && (!piece || Chess.piece(piece).player !== player)) {
@@ -53,7 +53,7 @@ export const straight: MoveFunc = ({ board, tile, length = 7 }) => {
     // Bottom
     const bottom = { rank: pos.rank - i, file: pos.file };
     if (!blocked.bottom) {
-      const piece = Chess.get(board, bottom);
+      const piece = Chess.get({ board, tile: bottom });
 
       // Is this a valid tile?
       if (bottom.rank > -1 && (!piece || Chess.piece(piece).player !== player)) {
@@ -69,7 +69,7 @@ export const straight: MoveFunc = ({ board, tile, length = 7 }) => {
     // Left
     const left = { rank: pos.rank, file: pos.file - i };
     if (!blocked.left) {
-      const piece = Chess.get(board, left);
+      const piece = Chess.get({ board, tile: left });
 
       // Is this a valid tile?
       if (left.file > -1 && (!piece || Chess.piece(piece).player !== player)) {
