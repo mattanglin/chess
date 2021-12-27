@@ -41,10 +41,10 @@ export const chess = createSlice({
     },
     makeMove: (state, action: PayloadAction<ChessMove>) => {
       const move = action.payload;
-      const { board, player } = state;
+      const { board, player, moves } = state;
       // Try to make the move
       try {
-        const result = Chess.move({ board, player, move });
+        const result = Chess.move({ board, player, move, moves });
         state.board = result.board;
         state.player = result.player;
         state.moves.push(result.move);

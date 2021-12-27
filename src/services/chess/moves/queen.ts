@@ -6,11 +6,11 @@ import { MoveFunc } from '../types';
  * Determine possible Queen moves. Queens adhere to the following rules:
  * - 
  */
-export const queen: MoveFunc = ({ board, tile}) => {
-  const moves = [
-    ...diagonal({ board, tile }),
-    ...straight({ board, tile }),
+export const queen: MoveFunc = ({ board, tile, moves }) => {
+  const availableMoves = [
+    ...diagonal({ board, tile, moves }),
+    ...straight({ board, tile, moves }),
   ];
 
-  return moves;
+  return availableMoves;
 };

@@ -1,4 +1,4 @@
-import { moves } from './moves';
+import { moves as pieceMoves } from './moves';
 import {
   ChessBoard,
   ChessPiece,
@@ -34,12 +34,7 @@ import {
   WhitePlayer,
   BlackPlayer,
 } from './constants';
-import { PopParams } from '.';
-
-
-
-
-
+import { BlackPawn, PopParams, WhitePawn } from '.';
 
 /**
  * REFACTORED CHESS CLASS
@@ -172,7 +167,15 @@ export class Chess {
   /**
    * Get available moves for piece at tile position
    */
-  public static getAvailableMoves = ({ board, tile }: { board: ChessBoard; tile: TileType }): ChessMove[] => {
+  public static getAvailableMoves = ({
+    board,
+    tile,
+    moves,
+  }: {
+    board: ChessBoard;
+    tile: TileType;
+    moves: ChessMove[];
+  }): ChessMove[] => {
     const availableMoves: ChessMove[] = [];
     const tileContent = Chess.get({ board, tile });
 
@@ -182,26 +185,26 @@ export class Chess {
 
     switch (piece.type) {
       case PawnPiece:
-        availableMoves.push(...moves.pawn({ board, tile }));
+        availableMoves.push(...pieceMoves.pawn({ board, tile, moves }));
         break;
       case RookPiece:
-        availableMoves.push(...moves.rook({ board, tile }));
+        availableMoves.push(...pieceMoves.rook({ board, tile, moves }));
         break;
       case KnightPiece:
-        availableMoves.push(...moves.knight({ board, tile }));
+        availableMoves.push(...pieceMoves.knight({ board, tile, moves }));
         break;
       case BishopPiece:
-        availableMoves.push(...moves.bishop({ board, tile }));
+        availableMoves.push(...pieceMoves.bishop({ board, tile, moves }));
         break;
       case QueenPiece:
-        availableMoves.push(...moves.queen({ board, tile }));
+        availableMoves.push(...pieceMoves.queen({ board, tile, moves }));
         break
       case KingPiece:
-        availableMoves.push(...moves.king({ board, tile }));
+        availableMoves.push(...pieceMoves.king({ board, tile, moves }));
         break;
     }
 
-    // TODO: Filter based on other situations?
+    // TODO: Filter based on other situations? Or handle that within each function?
     
     return availableMoves;
   }
@@ -209,8 +212,9 @@ export class Chess {
   /**
    * Validates whether a move is legal or not.
    * Throws error on invalid move.
+   * TODO: Pass current game moves to validate catling and en passant
    */
-  public static validateMove = ({ board, move, player }: MoveParams): ChessMove => {
+  public static validateMove = ({ board, move, player, moves }: MoveParams): ChessMove => {
     const tilePiece = Chess.get({ board, tile: move.from });
 
     // Is there a piece here?
@@ -221,9 +225,9 @@ export class Chess {
     if (piece.player !== player) throw new Error(`Cannot move other players piece at tile "${move.from}"`);
 
     // Get all possible legal moves for this piece and check that this is one of those moves
-    const moves = Chess.getAvailableMoves({ board, tile: move.from });
-    
-    const verifiedMove = moves.find((mv) => mv.from === move.from && mv.to === mv.to);
+    const availableMoves = Chess.getAvailableMoves({ board, tile: move.from, moves });
+  
+    const verifiedMove = availableMoves.find((mv) => mv.from === move.from && mv.to === move.to);
 
     if (!verifiedMove) throw new Error(`Invalid move of piece ${tilePiece} from tile "${move.from}" to "${move.to}"`)
 
@@ -240,13 +244,22 @@ export class Chess {
    * Validate and perform move on board.
    * Returns resulting board after move.
    */
-   public static move = ({ board, move, player }: MoveParams) => {
-     const verifiedMove = Chess.validateMove({ board, move, player });
-     const piece = Chess.get({ board, tile: move.from });
+   public static move = ({ board, move, player, moves }: MoveParams) => {
+     const verifiedMove = Chess.validateMove({ board, move, player, moves });
+     const piece = verifiedMove.promotion || Chess.get({ board, tile: move.from });
 
     //  Move piece
     Chess.set({ board, tile: move.from });
     Chess.set({ board, tile: move.to, piece });
+
+    // TODO: Handle en passant capture
+    if (move.enPassantCapture) {
+      const capturedPieceTile = Chess.tile([
+        Chess.tile(move.to).file,
+        Chess.tile(move.from).rank
+      ]);
+      Chess.set({ board, tile: capturedPieceTile });
+    }
 
     // Toggle Player
     const nextPlayer = player === WhitePlayer ? BlackPlayer : WhitePlayer;
@@ -261,22 +274,27 @@ export class Chess {
   /**
    * Add a number of moves all at once to get the resulting board
    */
-  public static travel = ({ board, moves = [], player, validate = false }: TravelParams) => {
+  public static travel = ({ board, moves = [], player }: TravelParams) => {
     const firstMovePiece = Chess.get({ board, tile: moves[0].from });
     let currentPlayer = player || Chess.piece(firstMovePiece!).player;
 
     moves.forEach((move) => {
-      if (validate) {
-        const verifiedMove = Chess.validateMove({ board, move, player: currentPlayer });
-      }
-
       const piece = Chess.get({ board, tile: move.from });
       Chess.set({ board, tile: move.from });
       Chess.set({ board, tile: move.to, piece });
 
+      // Handle en passant capture
+      if (move.enPassantCapture) {
+        const capturedPieceTile = Chess.tile([
+          Chess.tile(move.to).file,
+          Chess.tile(move.from).rank
+        ]);
+        Chess.set({ board, tile: capturedPieceTile });
+      }
+
       // Toggle current player
       currentPlayer = Chess.nextPlayer(currentPlayer);
-    })
+    });
 
     return {
       board,
@@ -296,11 +314,21 @@ export class Chess {
     for (let i = 0; i < count && moves.length; i++) {
       const move = moves.pop()!;
       const piece = Chess.get({ board, tile: move.to }) as ChessPiece;
-      const moveingPiece = move.pawnPromotion ? `${Chess.piece(piece).player}${PawnPiece}` as ChessPiece : piece;
+      const moveingPiece = move.promotion ? `${Chess.piece(piece).player}${PawnPiece}` as ChessPiece : piece;
       const replacedPiece = move.capture;
 
       Chess.set({ board, tile: move.from, piece: moveingPiece })
       Chess.set({ board, tile: move.to, piece: replacedPiece });
+
+      // TODO: Handle en passant capture
+      if (move.enPassantCapture) {
+        const capturedPieceTile = Chess.tile([
+          Chess.tile(move.to).file,
+          Chess.tile(move.from).rank,
+        ]);
+        const capturedPiece = Chess.piece(piece).player === 'W' ? BlackPawn : WhitePawn
+        Chess.set({ board, tile: capturedPieceTile, piece: capturedPiece })
+      }
     }
   }
 
@@ -342,7 +370,7 @@ export class Chess {
   /**
    * Validate move
    */
-  public validateMove = (move: ChessMove) => Chess.validateMove({ move, board: this._board, player: this._player });
+  public validateMove = (move: ChessMove) => Chess.validateMove({ move, board: this._board, player: this._player, moves: this._moves });
 
   /**
    * Validate and perform move on board.
@@ -350,12 +378,12 @@ export class Chess {
    * Returns resulting board after move.
    */
   public move = (move: ChessMove) => {
-    const result = Chess.move({ move, board: this._board, player: this._player });
+    const result = Chess.move({ move, board: this._board, player: this._player, moves: this._moves });
     this._moves.push(result.move);
     this._player = result.player;
     // TODO: Update Status?
   }
 
-  public getAvailableMoves = (tile: TileType) => Chess.getAvailableMoves({ board: this._board, tile });
+  public getAvailableMoves = (tile: TileType) => Chess.getAvailableMoves({ board: this._board, moves: this._moves, tile });
 
 }

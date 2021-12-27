@@ -10,4 +10,4 @@ import { straight } from './straight';
  * 
  * TODO: Do we handle castling here or in King move? Probably the King?
  */
-export const rook: MoveFunc = ({ board, tile }) => straight({ board, tile });
+export const rook: MoveFunc = ({ board, tile, moves }) => straight({ board, tile, moves });

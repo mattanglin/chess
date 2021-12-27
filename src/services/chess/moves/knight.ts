@@ -43,7 +43,11 @@ export const knight: MoveFunc = ({ board, tile }) => {
   });
 
   // Turn into moves
-  const moves: ChessMove[] = knightMoves.map(({ file, rank }) => ({ from: tileId, to: Chess.tile([file, rank])}))
+  const moves: ChessMove[] = knightMoves.map(({ file, rank }) => ({
+    piece,
+    from: tileId,
+    to: Chess.tile([file, rank]),
+  }));
 
   return moves;
 };

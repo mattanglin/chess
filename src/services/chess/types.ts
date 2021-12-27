@@ -67,11 +67,12 @@ export type TileConversionType = 'id' | 'object' | 'tuple' | 'indeces-object' | 
  * - player?
  */
 export interface ChessMove {
+  piece: ChessPiece;
   from: TileId;
   to: TileId;
   capture?: ChessPiece
-  pawnPromotion?: ChessPiece;
-  // TODO: Expand
+  promotion?: ChessPiece;
+  enPassantCapture?: boolean;
   // TODO: Special attribute for en passant?
 }
 export type WhiteToPlayStatus = 'WhiteToPlay';
@@ -99,13 +100,13 @@ export interface MoveParams {
   board: ChessBoard;
   move: ChessMove;
   player: ChessPlayer;
+  moves: ChessMove[];
 }
 
 export interface TravelParams {
   board: ChessBoard;
   moves: ChessMove[];
   player?: ChessPlayer;
-  validate?: boolean;
 }
 
 export interface PopParams {
@@ -118,6 +119,7 @@ export interface PopParams {
   tile: TileType;
   length?: 1 | 7;
   // TODO: Other possible things like promotion piece?
+  moves: ChessMove[];
 }
 
 export interface ValidateMoveParams {

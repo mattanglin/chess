@@ -13,7 +13,7 @@ import { WhitePlayer } from '../constants';
  * 
  * TODO: How to determine en passant? Pass last move?
  */
-export const pawn: MoveFunc = ({ board, tile }) => {
+export const pawn: MoveFunc = ({ board, tile, moves }) => {
   const tileId = Chess.tile(tile, 'id');
   const pos = Chess.tile(tileId, 'indeces-object');
   const piece = Chess.get({ board, tile: tileId })!;
@@ -21,18 +21,20 @@ export const pawn: MoveFunc = ({ board, tile }) => {
 
   const dir = player === WhitePlayer ? -1 : 1;
   const startingRank = player === WhitePlayer ? 6 : 1;
+  const otherPlayerStartingRank = player === WhitePlayer ? 1 : 6;
+  const otherPlayerDir = player === WhitePlayer ? 1 : -1;
 
-  const moves: ChessMove[] = [];
+  const availableMoves: ChessMove[] = [];
   
   // Basic 1 tile move
   const fwd = { rank: pos.rank + dir, file: pos.file };
   const blocked = !!Chess.get({ board, tile: fwd });
   
   if (!blocked) {
-    moves.push({ from: tileId, to: Chess.tile(fwd) });
+    availableMoves.push({ piece, from: tileId, to: Chess.tile(fwd) });
 
     // Promotion
-    // TODO
+    // TODO: Is there anything else to check here?
   }
 
   // First move 2
@@ -41,7 +43,7 @@ export const pawn: MoveFunc = ({ board, tile }) => {
     const blocked = !!Chess.get({ board, tile: fwd2 });
 
     if (!blocked) {
-      moves.push({ from: tileId, to: Chess.tile(fwd2) });
+      availableMoves.push({ piece, from: tileId, to: Chess.tile(fwd2) });
     }
   }
 
@@ -50,18 +52,36 @@ export const pawn: MoveFunc = ({ board, tile }) => {
   const leftPiece = Chess.get({ board, tile: left });
   
   if (leftPiece && Chess.piece(leftPiece).player !== player) {
-    moves.push({ from: tileId, to: Chess.tile(left) });
+    availableMoves.push({ piece, from: tileId, to: Chess.tile(left) });
   }
 
   // Capture Right
   const right = { rank: pos.rank + dir, file: pos.file + dir };
   const rightPiece = Chess.get({ board, tile: right });
   if (rightPiece && Chess.piece(rightPiece).player !== player) {
-    moves.push({ from: tileId, to: Chess.tile(right) });
+    availableMoves.push({ piece, from: tileId, to: Chess.tile(right) });
   }
 
   // En Passant
-  // TODO
+  // Check if the last move allows for an en passant
+  const lastMove = moves[moves.length - 1];
+  if (
+    lastMove &&
+    Chess.piece(lastMove.piece).type === 'P' &&
+    Chess.tile(lastMove.from).rank === otherPlayerStartingRank &&
+    Chess.tile(lastMove.to).rank === otherPlayerStartingRank + (otherPlayerDir * 2) &&
+    // Pieces on the same rank
+    pos.rank === Chess.tile(lastMove.to).rank &&
+    // Player piece on adjacent file
+    Math.abs(Chess.tile(lastMove.from).file - pos.file) === 1
+  ) {
+    availableMoves.push({
+      piece,
+      from: tileId,
+      to: Chess.tile([Chess.tile(lastMove.to).file, Chess.tile(lastMove.to).rank - otherPlayerDir]),
+      enPassantCapture: true,
+    })
+  }
 
-  return moves;
+  return availableMoves;
 };

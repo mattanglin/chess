@@ -38,7 +38,7 @@ export const BoardTile = (props: BoardTileProps) => {
   } = props;
 
   return (
-    <StyledStack onClick={onClick}>
+    <StyledStack onClick={onClick} title={id}>
       <Box
         style={{
           paddingTop: '100%',
@@ -46,6 +46,7 @@ export const BoardTile = (props: BoardTileProps) => {
         }}
         background={bg === 'dark' ? '#749655' : '#ECEED4'}
       />
+      {highlighted && !selected && <Box fill background="rgba(255, 255, 0, 0.5)" />}
       {selected && <Box fill background="rgba(0, 255, 0, 0.5)" />}
       {piece && <ChessPiece piece={piece} />}
       {available && (

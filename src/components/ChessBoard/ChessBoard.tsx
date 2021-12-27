@@ -6,10 +6,14 @@ import { BoardTile } from './BoardTile';
 import { makeMove } from '../../store/slices/chess';
 
 export const ChessBoard = () => {
-  const { board, player } = useAppSelector(state => state.chess);
+  const { board, player, moves } = useAppSelector(state => state.chess);
   const dispatch = useAppDispatch();
   const [selectedTile, setSelectedTile] = useState<TileId | undefined>(undefined);
   const [availableMoves, setAvailableMoves] = useState<ChessMove[]>([]);
+  const lastMoveMap = moves.length ? {
+    [moves[moves.length - 1].from]: moves[moves.length - 1],
+    [moves[moves.length - 1].to]: moves[moves.length - 1],
+  } : {};
   const availableMovesMap = availableMoves.reduce((agg, mv) => ({
     ...agg,
     [mv.to]: mv,
@@ -33,10 +37,10 @@ export const ChessBoard = () => {
     } else if (!selectedTile) {
       // Get possible moves
       try {
-        const moves = Chess.getAvailableMoves({ board, tile })
-        if (moves.length) {
+        const possibleMoves = Chess.getAvailableMoves({ board, tile, moves })
+        if (possibleMoves.length) {
           setSelectedTile(tile);
-          setAvailableMoves(moves);
+          setAvailableMoves(possibleMoves);
         } else {
           // TODO: Handle no moves?
         }
@@ -50,6 +54,7 @@ export const ChessBoard = () => {
   const movePiece = useCallback((tile: TileId) => {
     const move = availableMoves.find((mv) => mv.from === selectedTile && mv.to === tile);
     if (move) {
+      console.log('move:', { tile, move, selectedTile })
       dispatch(makeMove(move));
       setSelectedTile(undefined);
       setAvailableMoves([]);
@@ -97,10 +102,11 @@ export const ChessBoard = () => {
               piece,
               tile: Chess.tile([fileIdx, rankIdx]),
             })}
-            bg={(fileIdx + rankIdx) % 2 === 0 ? 'dark' : 'light'}
+            bg={(fileIdx + rankIdx) % 2 === 0 ? 'light' : 'dark'}
             piece={piece}
             selected={selectedTile && selectedTile === Chess.tile([fileIdx, rankIdx])}
             available={!!availableMovesMap[Chess.tile([fileIdx, rankIdx])]}
+            highlighted={!!lastMoveMap[Chess.tile([fileIdx, rankIdx])]}
           />
         ], [] as JSX.Element[])
       ], [] as JSX.Element[])}
