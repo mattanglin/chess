@@ -6,5 +6,6 @@ export interface CheckParams {
 }
 
 export const check = ({ player, board }: CheckParams) => {
-  // Determine if the current player is in check
+  // First find the the king
+  // Determine if the current player king tile is under attack
 }

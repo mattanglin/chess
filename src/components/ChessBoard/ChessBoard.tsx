@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Grid } from 'grommet';
 import { Chess, ChessMove, ChessPiece, TileId } from '../../services/chess';
 import { useAppDispatch, useAppSelector } from '../../store';
@@ -86,6 +86,10 @@ export const ChessBoard = () => {
     selectedTile,
     availableMoves,
   ]);
+  useEffect(() => {
+    const playerMoves = Chess.getAllPlayerMoves({ player, board, moves });
+    console.log({ playerMoves });
+  }, [player]);
 
   return (
     <Grid

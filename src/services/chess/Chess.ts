@@ -33,8 +33,10 @@ import {
   KingPiece,
   WhitePlayer,
   BlackPlayer,
+  BlackKing,
+  WhiteKing,
 } from './constants';
-import { BlackPawn, PopParams, WhitePawn } from '.';
+import { BlackPawn, GameStatus, GameStatusParams, PopParams, WhitePawn } from '.';
 import { attacked } from './status/attacked';
 
 /**
@@ -147,6 +149,16 @@ export class Chess {
   }
 
   /**
+   * Helper to clone ChessBoard arrays
+   */
+  public static clone = (board: ChessBoard) => {
+    const clonedBoard = board.map((rank) => (
+      rank.map((tile) => tile)
+    ));
+    return clonedBoard as ChessBoard;
+  }
+
+  /**
    * Helper to get the next player
    */
   public static nextPlayer = (player: ChessPlayer) => player === WhitePlayer ? BlackPlayer : WhitePlayer;
@@ -159,11 +171,30 @@ export class Chess {
     return board[pos.rank]?.[pos.file];
   }
 
+  /**
+   * Set ChessBoard tile
+   */
   public static set = ({ board, tile, piece }: { board: ChessBoard; tile: TileType; piece?: ChessPiece }) => {
     const pos = Chess.tile(tile, 'indeces-object');
     board[pos.rank][pos.file] = piece;
     return board;
   }
+
+  /**
+   * Find tiles by ChessPiece on a ChessBoard
+   */
+  public static tileByPiece = ({ piece: pieceToFind, board }: { piece: ChessPiece; board: ChessBoard }) => {
+    const tiles: TileId[] = [];
+    board.forEach((rank, rankIdx) => {
+      rank.forEach((piece, fileIdx) => {
+        if (piece === pieceToFind) {
+          tiles.push(Chess.tile({ file: fileIdx, rank: rankIdx }));
+        }
+      })
+    });
+    return tiles;
+  }
+
 
   /**
    * Get available moves for piece at tile position
@@ -210,13 +241,34 @@ export class Chess {
     return availableMoves;
   }
 
+  public static getAllPlayerTiles = ({ player, board }: { player: ChessPlayer; board: ChessBoard}) => {
+    const playerTiles: TileId[] = [];
+    board.forEach((rank, rankIdx) => {
+      rank.forEach((piece, fileIdx) => {
+        if (piece && Chess.piece(piece).player === player) {
+          playerTiles.push(Chess.tile({ file: fileIdx, rank: rankIdx }));
+        }
+      });
+    });
+    return playerTiles;
+  }
+
+  public static getAllPlayerMoves = ({ player, board, moves = [] }: { player: ChessPlayer; board: ChessBoard; moves: ChessMove[] }) => {
+    const playerTiles = Chess.getAllPlayerTiles({ player, board });
+    const playerMoves: ChessMove[] = [];
+    playerTiles.forEach((tileId) => {
+      playerMoves.push(...Chess.getAvailableMoves({ board, tile: tileId, moves }));
+    });
+    return playerMoves;
+  }
+
   /**
    * Validates whether a move is legal or not.
    * Throws error on invalid move.
    * TODO: Pass current game moves to validate catling and en passant
    */
   public static validateMove = ({ board, move, player, moves }: MoveParams): ChessMove => {
-    const tilePiece = Chess.get({ board, tile: move.from });
+    const tilePiece = Chess.get({ board: board, tile: move.from });
 
     // Is there a piece here?
     if (!tilePiece) throw new Error(`Cannot move piece from empty tile "${move.from}"`);
@@ -229,6 +281,8 @@ export class Chess {
     const availableMoves = Chess.getAvailableMoves({ board, tile: move.from, moves });
   
     const verifiedMove = availableMoves.find((mv) => mv.from === move.from && mv.to === move.to);
+
+    // TODO: Is this a pawn promotion with a selectedpiece promotion?
 
     if (!verifiedMove) throw new Error(`Invalid move of piece ${tilePiece} from tile "${move.from}" to "${move.to}"`)
 
@@ -244,21 +298,54 @@ export class Chess {
    * Determine if tile is under attack
    */
   public static tileAttacked = (params: { board: ChessBoard; player: ChessPlayer; tile: TileType }) => attacked(params);
-  
+
   /**
-   * Validate and perform move on board.
-   * Returns resulting board after move.
+   * Determine game status
+   * TODO: Option tocheck shallow game status? (i.e. No checkmate / stalemate?)
    */
-   public static move = ({ board, move, player, moves }: MoveParams) => {
-     const verifiedMove = Chess.validateMove({ board, move, player, moves });
-     const piece = verifiedMove.promotion || Chess.get({ board, tile: move.from });
+  public static status = ({ player, board }: GameStatusParams): GameStatus => {
+    const playerKing = player === 'W' ? WhiteKing : BlackKing
+    const [kingTile] = Chess.tileByPiece({ board, piece: playerKing });
+    
+    // Is the current player in check?
+    const kingAttacked = Chess.tileAttacked({ board, player, tile: kingTile });
+    // NOTE: We don't care about actually passing moves list since that only affects en passant & caslting which don't affect checkmate/stalemate
+    const playerMoves = Chess.getAllPlayerMoves({ board, player, moves: [] });
+    const playerHasEscapeMove = playerMoves.find((move) => {
+      const resultBoard = Chess.movePiece({ board, move });
+      const resultKingTile = Chess.piece(move.piece).type === 'K' ? move.to : kingTile;
+
+      return !Chess.tileAttacked({ board: resultBoard, tile: resultKingTile, player });
+    }) !== undefined;
+  
+    // check/checkmate status
+    if (kingAttacked) {
+      if (playerHasEscapeMove) {
+        return player === 'W' ? 'WhiteInCheck' : 'BlackInCheck';
+      } else {
+        return player === 'W' ? 'WhiteInCheckmate' : 'BlackInCheckmate';
+      }
+    } else if (!playerHasEscapeMove) {
+      // Are we in stalemate?
+      return player === 'W' ? 'WhiteInStalemate' : 'BlackInStalemate';
+    }
+  
+    return player === 'W' ? 'WhiteToPlay' : 'BlackToPlay';
+  };
+
+  /**
+   * Basic moving of piece with no validation or end status
+   */
+  public static movePiece = ({ board: originalBoard, move }: { board: ChessBoard; move: ChessMove }) => {
+    const board = Chess.clone(originalBoard);
+    const piece = move.promotion || Chess.get({ board, tile: move.from });
 
     //  Move piece
     Chess.set({ board, tile: move.from });
     Chess.set({ board, tile: move.to, piece });
 
     // Handle en passant capture
-    if (verifiedMove.enPassantCapture) {
+    if (move.enPassantCapture) {
       const capturedPieceTile = Chess.tile([
         Chess.tile(move.to).file,
         Chess.tile(move.from).rank
@@ -267,36 +354,52 @@ export class Chess {
     }
 
     // Handle Castling
-    if (verifiedMove.castle) {
+    if (move.castle) {
       // White Castling
-      if (verifiedMove.piece === 'WK') {
-        if (verifiedMove.castle === 'K') {
+      if (move.piece === 'WK') {
+        if (move.castle === 'K') {
           Chess.set({ board, tile: 'h1' });
           Chess.set({ board, tile: 'f1', piece: 'WR' });
-        } else if (verifiedMove.castle === 'Q') {
+        } else if (move.castle === 'Q') {
           Chess.set({ board, tile: 'a1' });
           Chess.set({ board, tile: 'd1', piece: 'WR' });
         }
       }
       // Black Castling
-      if (verifiedMove.piece === 'BK') {
-        if (verifiedMove.castle === 'K') {
+      if (move.piece === 'BK') {
+        if (move.castle === 'K') {
           Chess.set({ board, tile: 'h8' });
           Chess.set({ board, tile: 'f8', piece: 'BR' });
-        } else if (verifiedMove.castle === 'Q') {
+        } else if (move.castle === 'Q') {
           Chess.set({ board, tile: 'a8' });
           Chess.set({ board, tile: 'd8', piece: 'BR' });
         }
       }
     }
 
-    // Toggle Player
-    const nextPlayer = player === WhitePlayer ? BlackPlayer : WhitePlayer;
+    return board;
+  }
+  
+  /**
+   * Validate and perform move on board.
+   * Returns resulting board after move.
+   * TODO: Get game status after move
+   */
+  public static move = ({ board, move, player, moves }: MoveParams) => {
+    // Verify Move
+    const verifiedMove = Chess.validateMove({ board, move, player, moves });
+    // Move Piece
+    const boardAfterMove = Chess.movePiece({ board, move });
+    // Toggle next player
+    const nextPlayer = Chess.nextPlayer(player);
+    // Check Game Status
+    const status = Chess.status({ board: boardAfterMove, player: nextPlayer });
 
     return {
-      board,
+      board: boardAfterMove,
       move: verifiedMove,
       player: nextPlayer,
+      status,
     };
   }
 

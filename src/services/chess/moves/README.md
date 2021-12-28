@@ -20,7 +20,7 @@ A collection of piece move helper functions.
   - [x] Basic Movement
 - [ ] King
   - [x] Basic Movement
-  - [ ] Castling
+  - [x] Castling
 - [ ] Queen
   - [x] Basic Movement
 - [ ] Invalidate move into check

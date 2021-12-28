@@ -1,4 +1,4 @@
-import { BishopPiece, KingPiece, QueenPiece } from '..';
+import { BishopPiece, ChessPiece, KingPiece, QueenPiece } from '..';
 import { Chess } from '../Chess';
 import { ChessBoard, ChessPlayer, TileType } from '../types';
 
@@ -7,6 +7,7 @@ export interface AttackedConfig {
   board: ChessBoard;
   // Player under attack?
   player: ChessPlayer;
+  allAttacks?: boolean;
 }
 
 /**

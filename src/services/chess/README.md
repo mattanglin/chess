@@ -1,19 +1,6 @@
 # Chess
 Basic functionality for playing a game of chess.
 
-## Structure
-
-This library is organized into hierachically composed class objects
-
-- `ChessGame`
-  - `ChessBoard`
-    - `ChessPiece`
-  - `ChessMove`
-
-### `ChessGame`
-
-The `ChessGame` class manages logic an entire game of chess.
-
 ### `ChessBoard`
 
 The chess board has 2 different representations: Keyed object and Array.
@@ -47,23 +34,30 @@ TODO
   - [x] Game object
 - [ ] Engine
   - [ ] Move validation
-    - [ ] Pawn
-      - [ ] Basic move
-      - [ ] First move
-      - [ ] Attack
+    - [x] Pawn
+      - [x] Basic move
+      - [x] First move
+      - [x] Attack
       - [ ] Promotion
-      - [ ] En passant
-    - [ ] Rook
-    - [ ] Knight
-    - [ ] Bishop
-    - [ ] Queen
+      - [x] En passant
+    - [x] Rook
+    - [x] Knight
+    - [x] Bishop
+    - [x] Queen
     - [ ] King
+      - [x] Basic move
+      - [x] Castling
       - [ ] No move into check
   - [ ] Possible moves for piece
   - [ ] Make move
-  - [ ] Check validation
-  - [ ] Checkamte validation
-  - [ ] Stalemate validation
+  - [x] Check validation
+  - [x] Checkamte validation
+  - [x] Stalemate validation (Need to verify still)
   - [ ] Game notation output
   - [ ] Basic AI engine
 - [ ] UI
+  - [ ] Moveable board pieces
+  - [ ] Pawn Promotion
+  - [ ] Moves list
+  - [ ] Time traveling
+  - [ ] 

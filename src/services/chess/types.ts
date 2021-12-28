@@ -92,6 +92,11 @@ export type GameStatus =
   | BlackInCheckmateStatus
   | WhiteInStalemateStatus
   | BlackInStalemateStatus;
+export interface GameStatusParams {
+  player: ChessPlayer;
+  board: ChessBoard;
+  // TODO: Do we need moves? Probably not since castling is not available when in check or checkmate
+}
 
 /**
  * Move Types
@@ -101,6 +106,7 @@ export interface MoveParams {
   move: ChessMove;
   player: ChessPlayer;
   moves: ChessMove[];
+  status?: boolean;
 }
 
 export interface TravelParams {
