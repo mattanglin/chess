@@ -35,6 +35,9 @@ export const ChessBoard = () => {
       setSelectedTile(undefined);
       setAvailableMoves([]);
     } else if (!selectedTile) {
+      const isUnderAttack = Chess.tileAttacked({ board, tile, player });
+      console.log(`Tile: ${Chess.tile(tile, 'id')} - ${isUnderAttack ? 'ATTACKED' : 'safe'}`);
+
       // Get possible moves
       try {
         const possibleMoves = Chess.getAvailableMoves({ board, tile, moves })
@@ -50,7 +53,7 @@ export const ChessBoard = () => {
       }
     }
 
-  }, [board, selectedTile, setSelectedTile, setAvailableMoves]);
+  }, [board, selectedTile, setSelectedTile, setAvailableMoves, moves, player]);
   const movePiece = useCallback((tile: TileId) => {
     const move = availableMoves.find((mv) => mv.from === selectedTile && mv.to === tile);
     if (move) {

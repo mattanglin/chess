@@ -10,7 +10,7 @@ A collection of piece move helper functions.
   - [x] Basic Movement / Attack
   - [x] First movement
   - [x] Capture
-  - [ ] En passant
+  - [x] En passant
   - [ ] Promotion
 - [ ] Rook
   - [x] Basic Movement

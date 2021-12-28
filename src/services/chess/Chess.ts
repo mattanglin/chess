@@ -35,6 +35,7 @@ import {
   BlackPlayer,
 } from './constants';
 import { BlackPawn, PopParams, WhitePawn } from '.';
+import { attacked } from './status/attacked';
 
 /**
  * REFACTORED CHESS CLASS
@@ -239,6 +240,10 @@ export class Chess {
     return verifiedMove;
   }
 
+  /**
+   * Determine if tile is under attack
+   */
+  public static tileAttacked = (params: { board: ChessBoard; player: ChessPlayer; tile: TileType }) => attacked(params);
   
   /**
    * Validate and perform move on board.
