@@ -257,13 +257,37 @@ export class Chess {
     Chess.set({ board, tile: move.from });
     Chess.set({ board, tile: move.to, piece });
 
-    // TODO: Handle en passant capture
-    if (move.enPassantCapture) {
+    // Handle en passant capture
+    if (verifiedMove.enPassantCapture) {
       const capturedPieceTile = Chess.tile([
         Chess.tile(move.to).file,
         Chess.tile(move.from).rank
       ]);
       Chess.set({ board, tile: capturedPieceTile });
+    }
+
+    // Handle Castling
+    if (verifiedMove.castle) {
+      // White Castling
+      if (verifiedMove.piece === 'WK') {
+        if (verifiedMove.castle === 'K') {
+          Chess.set({ board, tile: 'h1' });
+          Chess.set({ board, tile: 'f1', piece: 'WR' });
+        } else if (verifiedMove.castle === 'Q') {
+          Chess.set({ board, tile: 'a1' });
+          Chess.set({ board, tile: 'd1', piece: 'WR' });
+        }
+      }
+      // Black Castling
+      if (verifiedMove.piece === 'BK') {
+        if (verifiedMove.castle === 'K') {
+          Chess.set({ board, tile: 'h8' });
+          Chess.set({ board, tile: 'f8', piece: 'BR' });
+        } else if (verifiedMove.castle === 'Q') {
+          Chess.set({ board, tile: 'a8' });
+          Chess.set({ board, tile: 'd8', piece: 'BR' });
+        }
+      }
     }
 
     // Toggle Player
@@ -297,6 +321,30 @@ export class Chess {
         Chess.set({ board, tile: capturedPieceTile });
       }
 
+      // Handle Castling
+      if (move.castle) {
+        // White Castling
+        if (move.piece === 'WK') {
+          if (move.castle === 'K') {
+            Chess.set({ board, tile: 'h1' });
+            Chess.set({ board, tile: 'f1', piece: 'WR' });
+          } else if (move.castle === 'Q') {
+            Chess.set({ board, tile: 'a1' });
+            Chess.set({ board, tile: 'd1', piece: 'WR' });
+          }
+        }
+        // Black Castling
+        if (move.piece === 'BK') {
+          if (move.castle === 'K') {
+            Chess.set({ board, tile: 'h8' });
+            Chess.set({ board, tile: 'f8', piece: 'BR' });
+          } else if (move.castle === 'Q') {
+            Chess.set({ board, tile: 'a8' });
+            Chess.set({ board, tile: 'd8', piece: 'BR' });
+          }
+        }
+      }
+
       // Toggle current player
       currentPlayer = Chess.nextPlayer(currentPlayer);
     });
@@ -325,7 +373,7 @@ export class Chess {
       Chess.set({ board, tile: move.from, piece: moveingPiece })
       Chess.set({ board, tile: move.to, piece: replacedPiece });
 
-      // TODO: Handle en passant capture
+      // Handle en passant capture
       if (move.enPassantCapture) {
         const capturedPieceTile = Chess.tile([
           Chess.tile(move.to).file,
@@ -333,6 +381,31 @@ export class Chess {
         ]);
         const capturedPiece = Chess.piece(piece).player === 'W' ? BlackPawn : WhitePawn
         Chess.set({ board, tile: capturedPieceTile, piece: capturedPiece })
+      }
+
+      // Handle Castling
+      if (move.castle) {
+        // White Castling
+        if (move.piece === 'WK') {
+          if (move.castle === 'K') {
+            Chess.set({ board, tile: 'f1' });
+            Chess.set({ board, tile: 'h1', piece: 'WR' });
+          } else if (move.castle === 'Q') {
+            Chess.set({ board, tile: 'd1' });
+            Chess.set({ board, tile: 'a1', piece: 'WR' });
+          }
+        }
+
+        // Black Castling
+        if (move.piece === 'BK') {
+          if (move.castle === 'K') {
+            Chess.set({ board, tile: 'f8' });
+            Chess.set({ board, tile: 'h8', piece: 'BR' });
+          } else if (move.castle === 'Q') {
+            Chess.set({ board, tile: 'd8' });
+            Chess.set({ board, tile: 'a8', piece: 'BR' });
+          }
+        }
       }
     }
   }

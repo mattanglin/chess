@@ -73,7 +73,7 @@ export interface ChessMove {
   capture?: ChessPiece
   promotion?: ChessPiece;
   enPassantCapture?: boolean;
-  // TODO: Special attribute for en passant?
+  castle?: 'K' | 'Q';
 }
 export type WhiteToPlayStatus = 'WhiteToPlay';
 export type BlackToPlayStatus = 'BlackToPlay';
