@@ -286,8 +286,6 @@ export class Chess {
 
     if (!verifiedMove) throw new Error(`Invalid move of piece ${tilePiece} from tile "${move.from}" to "${move.to}"`)
 
-    // TODO: Pass along promotion as necessary
-
     // Is the player currently in check?
     // Is the player now out of check?
     // Will this be covered by the available moves eventually? Probably
@@ -338,6 +336,7 @@ export class Chess {
    */
   public static movePiece = ({ board: originalBoard, move }: { board: ChessBoard; move: ChessMove }) => {
     const board = Chess.clone(originalBoard);
+    // Handles updating promotion piece
     const piece = move.promotion || Chess.get({ board, tile: move.from });
 
     //  Move piece
@@ -470,10 +469,10 @@ export class Chess {
     for (let i = 0; i < count && moves.length; i++) {
       const move = moves.pop()!;
       const piece = Chess.get({ board, tile: move.to }) as ChessPiece;
-      const moveingPiece = move.promotion ? `${Chess.piece(piece).player}${PawnPiece}` as ChessPiece : piece;
+      const movingPiece = move.promotion ? `${Chess.piece(piece).player}${PawnPiece}` as ChessPiece : piece;
       const replacedPiece = move.capture;
 
-      Chess.set({ board, tile: move.from, piece: moveingPiece })
+      Chess.set({ board, tile: move.from, piece: movingPiece })
       Chess.set({ board, tile: move.to, piece: replacedPiece });
 
       // Handle en passant capture

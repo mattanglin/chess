@@ -38,7 +38,7 @@ TODO
       - [x] Basic move
       - [x] First move
       - [x] Attack
-      - [ ] Promotion
+      - [x] Promotion
       - [x] En passant
     - [x] Rook
     - [x] Knight

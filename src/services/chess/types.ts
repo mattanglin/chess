@@ -23,6 +23,9 @@ export type BlackPawnType = 'BP';
 export type ChessPiece = 
   | WhiteKingType | WhiteQueenType | WhiteBishopType | WhiteKnightType | WhiteRookType | WhitePawnType
   | BlackKingType | BlackQueenType | BlackBishopType | BlackKnightType | BlackRookType | BlackPawnType;
+export type PromotionPiece =
+  | WhiteQueenType | WhiteKnightType | WhiteBishopType | WhiteRookType
+  | BlackQueenType | BlackKnightType | BlackBishopType | BlackRookType;
 export type WhitePiece = WhiteKingType | WhiteQueenType | WhiteBishopType | WhiteKnightType | WhiteRookType | WhitePawnType;
 export type BlackPiece = BlackKingType | BlackQueenType | BlackBishopType | BlackKnightType | BlackRookType | BlackPawnType;
 export type OptionalPiece = ChessPiece | undefined;
@@ -71,7 +74,7 @@ export interface ChessMove {
   from: TileId;
   to: TileId;
   capture?: ChessPiece
-  promotion?: ChessPiece;
+  promotion?: PromotionPiece;
   enPassantCapture?: boolean;
   castle?: 'K' | 'Q';
 }

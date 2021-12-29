@@ -1,6 +1,7 @@
 import { Chess } from '../Chess';
 import { MoveFunc, ChessMove } from '../types';
 import { WhitePlayer } from '../constants';
+import { BlackQueen, WhiteQueen } from '..';
 
 /**
  * Determine available pawn moves. Pawns adhere to the following rules:
@@ -23,18 +24,25 @@ export const pawn: MoveFunc = ({ board, tile, moves }) => {
   const startingRank = player === WhitePlayer ? 6 : 1;
   const otherPlayerStartingRank = player === WhitePlayer ? 1 : 6;
   const otherPlayerDir = player === WhitePlayer ? 1 : -1;
-
+  
   const availableMoves: ChessMove[] = [];
   
   // Basic 1 tile move
   const fwd = { rank: pos.rank + dir, file: pos.file };
   const blocked = !!Chess.get({ board, tile: fwd });
+
+  // Promotion for basic and capture moves (defaults to queen for available moves)
+  const promotionRank = player === WhitePlayer ? 0 : 7;
+  const promoteToQueen = player === WhitePlayer ? WhiteQueen : BlackQueen;
+  const promotion = fwd.rank === promotionRank ? promoteToQueen : undefined;
   
   if (!blocked) {
-    availableMoves.push({ piece, from: tileId, to: Chess.tile(fwd) });
-
-    // Promotion
-    // TODO: Is there anything else to check here?
+    availableMoves.push({
+      piece,
+      from: tileId,
+      to: Chess.tile(fwd),
+      promotion,
+    });
   }
 
   // First move 2
@@ -52,14 +60,14 @@ export const pawn: MoveFunc = ({ board, tile, moves }) => {
   const leftPiece = Chess.get({ board, tile: left });
   
   if (leftPiece && Chess.piece(leftPiece).player !== player) {
-    availableMoves.push({ piece, from: tileId, to: Chess.tile(left) });
+    availableMoves.push({ piece, from: tileId, to: Chess.tile(left), promotion });
   }
 
   // Capture Right
   const right = { rank: pos.rank + dir, file: pos.file + dir };
   const rightPiece = Chess.get({ board, tile: right });
   if (rightPiece && Chess.piece(rightPiece).player !== player) {
-    availableMoves.push({ piece, from: tileId, to: Chess.tile(right) });
+    availableMoves.push({ piece, from: tileId, to: Chess.tile(right), promotion });
   }
 
   // En Passant

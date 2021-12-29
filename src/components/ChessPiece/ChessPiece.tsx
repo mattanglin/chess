@@ -25,7 +25,7 @@ export const ChessPiece = ({
 }: ChessPieceProps) => {
   return (
     <Box fill pad="small">
-      <Image src={pieceMap[piece]} />
+      <Image src={pieceMap[piece]} alt={piece} />
     </Box>
   )
 }
