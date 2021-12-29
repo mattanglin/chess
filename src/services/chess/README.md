@@ -47,9 +47,9 @@ TODO
     - [ ] King
       - [x] Basic move
       - [x] Castling
-      - [ ] No move into check
-  - [ ] Possible moves for piece
-  - [ ] Make move
+      - [x] No move into check
+  - [x] Possible moves for piece
+  - [x] Make move
   - [x] Check validation
   - [x] Checkamte validation
   - [x] Stalemate validation (Need to verify still)
@@ -60,4 +60,4 @@ TODO
   - [ ] Pawn Promotion
   - [ ] Moves list
   - [ ] Time traveling
-  - [ ] 
+  - [ ] Toggle Player Board

@@ -236,9 +236,16 @@ export class Chess {
         break;
     }
 
-    // TODO: Filter based on other situations? Or handle that within each function?
+    // Filter out moves that would put the players king under attack
+    const playerKing = piece.player === 'W' ? WhiteKing : BlackKing;
+    const [originalKingTile] = Chess.tileByPiece({ board, piece: playerKing });
+    const availableValidMoves = availableMoves.filter((move) => {
+      const boardAfterMove = Chess.movePiece({ board, move });
+      const kingTile = move.piece === playerKing ? move.to : originalKingTile;
+      return !Chess.tileAttacked({ board: boardAfterMove, tile: kingTile, player: piece.player });
+    });
     
-    return availableMoves;
+    return availableValidMoves;
   }
 
   public static getAllPlayerTiles = ({ player, board }: { player: ChessPlayer; board: ChessBoard}) => {
