@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { BoardTile } from './BoardTile';
 import { makeMove } from '../../store/slices/chess';
 import { PawnPromotionModal } from './PawnPromotionModal';
+import { Navigation } from './Navigation';
 
 export const ChessBoard = () => {
   const { board, player, moves } = useAppSelector(state => state.chess);
@@ -124,7 +125,10 @@ export const ChessBoard = () => {
   }, [player]);
 
   return (
-    <>
+    <Box>
+      <Box>
+        <Navigation moves={moves} />
+      </Box>
       <Grid
         style={{ background: 'black' }}
         rows={['flex', 'flex', 'flex', 'flex', 'flex', 'flex', 'flex', 'flex']}
@@ -157,6 +161,6 @@ export const ChessBoard = () => {
         onClick={movePawnAndPromote}
         onClose={closePawnPromotion}
       />
-    </>
+    </Box>
   )
 }

@@ -65,7 +65,7 @@ export class Chess {
 
   constructor(config: ChessConfig = {}) {
     // Initialize with board, moves, etc
-    this._board = config._board || startingBoard;
+    this._board = config._board || Chess.clone(startingBoard);
     this._moves = config._moves || [];
     this._player = config._player || 'W';
   }
@@ -162,6 +162,50 @@ export class Chess {
    * Helper to get the next player
    */
   public static nextPlayer = (player: ChessPlayer) => player === WhitePlayer ? BlackPlayer : WhitePlayer;
+
+  /**
+   * Helper to Generate Chess Notation based on list of moves
+   * TODO: Import board/moves from algebraic moves
+   */
+  public static algebraic = (moves: ChessMove[]) => {
+    const board = Chess.clone(startingBoard);
+    const algebraicMoves = moves.map((move) => {
+      // Get piece notation
+      let notation: string = '';
+      if (move.castle) {
+        switch(move.castle) {
+          case 'K':
+            notation = 'O-O';
+            break;
+          case 'Q':
+            notation = 'O-O-O';
+            break;
+        }
+      } else {
+        // Move piece
+        const pieceType = Chess.piece(move.piece).type;
+        notation = pieceType !== 'P' ? pieceType : '';
+        // Disambiguation
+        notation += move.disambiguation || '';
+        // Capture
+        notation += `${move.capture ? 'x' : ''}`;
+        // Target Tile
+        notation += move.to;
+        // Pawn Promotion
+        notation += move.promotion ? `=${Chess.piece(move.promotion).type}` : '';
+      }
+      
+      // Check?
+      if (move.check) {
+        notation += '+';
+      } else if (move.checkmate) {
+        notation += '#';
+      }
+      return notation;
+    });
+
+    return algebraicMoves;
+  }
 
   /**
    * Return possible piece at board tile position
@@ -394,6 +438,7 @@ export class Chess {
   public static move = ({ board, move, player, moves }: MoveParams) => {
     // Verify Move
     const verifiedMove = Chess.validateMove({ board, move, player, moves });
+    const availableMoves = Chess.getAllPlayerMoves({ board, player, moves });
     // Move Piece
     const boardAfterMove = Chess.movePiece({ board, move });
     // Toggle next player
@@ -401,9 +446,39 @@ export class Chess {
     // Check Game Status
     const status = Chess.status({ board: boardAfterMove, player: nextPlayer });
 
+    // Disambiguate move notation
+    let disambiguateRank = false;
+    let disambiguateFile = false;
+    availableMoves.forEach((mv) => {
+      if (mv.piece === move.piece && mv.to === move.to && mv.from !== move.from) {
+        const moveTile = Chess.tile(move.from, 'object');
+        const mvTile = Chess.tile(mv.from, 'object');
+
+        const sameFile = moveTile.file === mvTile.file;
+        const sameRank = moveTile.rank === mvTile.rank;
+
+        if (sameRank) {
+          disambiguateFile = true;
+        }
+        if (sameFile) {
+          disambiguateRank = true;
+        }
+      }
+    });
+
+    // Adjust move as necessary
+    const from = Chess.tile(move.from, 'object');
+    const resolvedMove: ChessMove = {
+      ...verifiedMove,
+      check: status === 'WhiteInCheck' || status === 'BlackInCheck',
+      checkmate: status === 'WhiteInCheckmate' || status === 'BlackInCheckmate',
+      disambiguation: `${disambiguateFile ? from.file : ''}${disambiguateRank ? from.rank : ''}`,
+      capture: Chess.get({ board, tile: move.to }),
+    };
+
     return {
       board: boardAfterMove,
-      move: verifiedMove,
+      move: resolvedMove,
       player: nextPlayer,
       status,
     };

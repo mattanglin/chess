@@ -77,6 +77,10 @@ export interface ChessMove {
   promotion?: PromotionPiece;
   enPassantCapture?: boolean;
   castle?: 'K' | 'Q';
+  check?: boolean;
+  checkmate?: boolean;
+  // Disambiguation?
+  disambiguation?: string;
 }
 export type WhiteToPlayStatus = 'WhiteToPlay';
 export type BlackToPlayStatus = 'BlackToPlay';

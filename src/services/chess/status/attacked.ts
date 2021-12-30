@@ -1,4 +1,4 @@
-import { BishopPiece, ChessPiece, KingPiece, QueenPiece } from '..';
+import { BishopPiece, ChessPiece, KingPiece, QueenPiece, RookPiece } from '..';
 import { Chess } from '../Chess';
 import { ChessBoard, ChessPlayer, TileType } from '../types';
 
@@ -162,7 +162,7 @@ export const attacked = ({ tile, board, player }: AttackedConfig) => {
 
   // Check straights (King/Queen/Rook)
   if (!tileUnderAttack) {
-    const attackingPieceTypes = [QueenPiece, BishopPiece];
+    const attackingPieceTypes = [QueenPiece, RookPiece];
     // TODO: HANDLE KING ATTACK
     // Check each straight for attacking piece
     const blocked = {

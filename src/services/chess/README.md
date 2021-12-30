@@ -53,7 +53,8 @@ TODO
   - [x] Check validation
   - [x] Checkamte validation
   - [x] Stalemate validation (Need to verify still)
-  - [ ] Game notation output
+  - [x] Game notation output
+  - [ ] Algebraic notation to moves / board / game
   - [ ] Basic AI engine
 - [ ] UI
   - [ ] Moveable board pieces
