@@ -10,6 +10,8 @@ import { Chess } from '..';
 export const king: MoveFunc = ({ board, tile, moves }) => {
   const piece = Chess.get({ board, tile })!;
   const player = Chess.piece(piece).player;
+  const kingRank = player === 'W' ? 7 : 0;
+  const kingPos = Chess.tile(tile, 'indeces-object');
   
   const availableMoves = [
     ...straight({ board, tile, moves, length: 1}),
@@ -17,12 +19,13 @@ export const king: MoveFunc = ({ board, tile, moves }) => {
   ];
 
   // Determine if we can castle
-  let kingMoved = false;
+  let kingMoved = kingPos.file !== 4 || kingPos.rank !== kingRank;
   let aFileRookMoved = false;
   let hFileRookMoved = false;
   const mvStart = Chess.piece(piece).player === 'W' ? 0 : 1;
 
-  for (let i = mvStart; i < moves.length && ! kingMoved; i += 2) {
+  // Have the king or rooks moved?
+  for (let i = mvStart; i < moves.length && !kingMoved; i += 2) {
     const move = moves[i];
     const movedPiece = Chess.piece(move.piece);
     if (movedPiece.type === 'K') {

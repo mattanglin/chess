@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Grid } from 'grommet';
 import { Chess, ChessMove, ChessPiece, PromotionPiece, TileId } from '../../services/chess';
 import { useAppDispatch, useAppSelector } from '../../store';
@@ -8,14 +8,24 @@ import { PawnPromotionModal } from './PawnPromotionModal';
 import { Navigation } from './Navigation';
 
 export const ChessBoard = () => {
-  const { board, player, moves } = useAppSelector(state => state.chess);
+  const { board: stateBoard, player, moves } = useAppSelector(state => state.chess);
   const dispatch = useAppDispatch();
   const [selectedTile, setSelectedTile] = useState<TileId | undefined>(undefined);
   const [availableMoves, setAvailableMoves] = useState<ChessMove[]>([]);
+  const [moveOffset, setMoveOffset] = useState(0);
+  const inPlay = moveOffset === 0;
+  const board = useMemo(() => {
+    const result = Chess.pop({
+      board: stateBoard,
+      moves,
+      count: moveOffset,
+    });
+    return result.board;
+  }, [stateBoard, moveOffset, moves]);
   
   const lastMoveMap = moves.length ? {
-    [moves[moves.length - 1].from]: moves[moves.length - 1],
-    [moves[moves.length - 1].to]: moves[moves.length - 1],
+    [moves[moves.length - moveOffset - 1].from]: moves[moves.length - moveOffset - 1],
+    [moves[moves.length - moveOffset - 1].to]: moves[moves.length - moveOffset - 1],
   } : {};
   const availableMovesMap = availableMoves.reduce((agg, mv) => ({
     ...agg,
@@ -94,21 +104,22 @@ export const ChessBoard = () => {
     tile: TileId;
     piece?: ChessPiece;
   }) => {
-    // Resolve selecting a piece
-    if ((!selectedTile && piece && Chess.piece(piece).player === player) || (selectedTile && tile === selectedTile)) return () => selectPiece(tile);
-    // Resolve moving a piece normally
-    if (selectedTile) {
-      // Can we move to this tile?
-      const tileMove = availableMoves.find((mv) => mv.to === tile);
-
-      if (tileMove) {
-        // Pawn Promotion Modal
-        if (tileMove.promotion) return () => openPawnPromotion(tile);
-
-        // Normal Move
-        return () => movePiece(tile);
+    if (inPlay) {
+      // Resolve selecting a piece
+      if ((!selectedTile && piece && Chess.piece(piece).player === player) || (selectedTile && tile === selectedTile)) return () => selectPiece(tile);
+      // Resolve moving a piece normally
+      if (selectedTile) {
+        // Can we move to this tile?
+        const tileMove = availableMoves.find((mv) => mv.to === tile);
+  
+        if (tileMove) {
+          // Pawn Promotion Modal
+          if (tileMove.promotion) return () => openPawnPromotion(tile);
+  
+          // Normal Move
+          return () => movePiece(tile);
+        }
       }
-
     }
   }, [
     selectPiece,
@@ -117,17 +128,30 @@ export const ChessBoard = () => {
     player,
     selectedTile,
     availableMoves,
+    inPlay,
   ]);
   // TODO: Testing...
   useEffect(() => {
     const playerMoves = Chess.getAllPlayerMoves({ player, board, moves });
     console.log({ playerMoves });
   }, [player]);
+  const onNavigate = useCallback((offset: number) => {
+    setMoveOffset(offset)
+    if (offset !== 0) {
+      setSelectedTile(undefined);
+      setAvailableMoves([]);
+      setPawnPromotionTile(undefined);
+    }
+  }, [setMoveOffset]);
 
   return (
     <Box>
       <Box>
-        <Navigation moves={moves} />
+        <Navigation
+          moves={moves}
+          onNavigate={onNavigate}
+          offset={moveOffset}
+        />
       </Box>
       <Grid
         style={{ background: 'black' }}

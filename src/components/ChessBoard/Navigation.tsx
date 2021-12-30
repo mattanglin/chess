@@ -1,40 +1,53 @@
-import { Box } from 'grommet';
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Box, Button } from 'grommet';
 import { Chess, ChessMove } from '../../services/chess';
-
-const NavigationWrapper = styled(Box)({
-
-});
 
 export interface NavigationProps {
   moves: ChessMove[];
-  onNavigate?: (inPlay: boolean) => void;
+  offset?: number;
+  onNavigate?: (offset: number) => void;
 }
 
 export const Navigation = ({
   moves,
+  offset = 0,
+  onNavigate = () => undefined,
 }: NavigationProps) => {
+  const moveIdx = moves.length - offset;
+  const setMoveIdx = useCallback((idx: number) => {
+    if (idx <= moves.length && idx >= 0) {
+      const idxOffset = moves.length - idx;
+      onNavigate(idxOffset);
+    }
+  }, [moves.length, onNavigate]);
+  const previous = useCallback(() => setMoveIdx(moveIdx - 1), [setMoveIdx, moveIdx]);
+  const next = useCallback(() => setMoveIdx(moveIdx + 1), [setMoveIdx, moveIdx]);
   const algebraic = useMemo(() => Chess.algebraic(moves), [moves]);
 
   return (
-    <NavigationWrapper>
-      <Box className="wrapper" direction="row-reverse" overflow="scroll" height={{ min: '32px' }} align="center">
-        <Box className="inner" direction="row" width={{ max: 'none', min: '100%' }} overflow="visible" flex={false}>
+    <Box direction="row">
+      <Box direction="row-reverse" overflow="scroll" align="center" flex>
+        <Box direction="row" width={{ max: 'none', min: '100%' }} overflow="visible" flex={false} gap="small">
           {Array.from({ length: Math.ceil(algebraic.length / 2) }).map((_, i) => {
-            const white = algebraic[i * 2];
-            const black = algebraic[i * 2 + 1];
+            const whiteIdx = i * 2;
+            const blackIdx = i * 2 + 1;
+            const white = algebraic[whiteIdx];
+            const black = algebraic[blackIdx];
 
             return (
               <Box key={`${i}-${white}-${black}`} direction="row" gap="xsmall" flex={false}>
-                <Box>{i + 1}.</Box>
-                {white && <Box>{white}</Box>}
-                {black && <Box>{black}</Box>}
+                <Box style={{ fontWeight: 300 }}>{i + 1}.</Box>
+                {white && <Box onClick={() => setMoveIdx(whiteIdx + 1)} style={offset === moves.length - whiteIdx - 1 ? { fontWeight: 'bold' } : {}}>{white}</Box>}
+                {black && <Box onClick={() => setMoveIdx(blackIdx + 1)} style={offset === moves.length - blackIdx - 1 ? { fontWeight: 'bold' } : {}}>{black}</Box>}
               </Box>
             )
           })}
         </Box>
       </Box>
-    </NavigationWrapper>
+      <Box pad={{ left: 'medium', vertical: 'xsmall' }} direction="row">
+        <Button onClick={previous} label="<" />
+        <Button onClick={next} label=">" />
+      </Box>
+    </Box>
   )
 };

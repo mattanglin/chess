@@ -544,10 +544,13 @@ export class Chess {
    * Pop moves off the move stack and return the board to previous states
    */
   public static pop = ({
-    board,
-    moves = [],
+    board: originalBoard,
+    moves: originalMoves = [],
     count = 1,
   }: PopParams) => {
+    const board = Chess.clone(originalBoard);
+    const moves = [...originalMoves];
+
     for (let i = 0; i < count && moves.length; i++) {
       const move = moves.pop()!;
       const piece = Chess.get({ board, tile: move.to }) as ChessPiece;
@@ -592,6 +595,11 @@ export class Chess {
         }
       }
     }
+    return {
+      board,
+      moves,
+      player: moves.length % 2 === 0 ? WhitePlayer : BlackPlayer,
+    };
   }
 
   /**

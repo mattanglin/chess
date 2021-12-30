@@ -32,8 +32,8 @@ TODO
   - [x] Move object
   - [x] Piece object
   - [x] Game object
-- [ ] Engine
-  - [ ] Move validation
+- [x] Engine
+  - [x] Move validation
     - [x] Pawn
       - [x] Basic move
       - [x] First move
@@ -44,7 +44,7 @@ TODO
     - [x] Knight
     - [x] Bishop
     - [x] Queen
-    - [ ] King
+    - [x] King
       - [x] Basic move
       - [x] Castling
       - [x] No move into check
@@ -58,7 +58,7 @@ TODO
   - [ ] Basic AI engine
 - [ ] UI
   - [ ] Moveable board pieces
-  - [ ] Pawn Promotion
-  - [ ] Moves list
-  - [ ] Time traveling
+  - [x] Pawn Promotion
+  - [x] Moves list
+  - [x] Time traveling
   - [ ] Toggle Player Board
