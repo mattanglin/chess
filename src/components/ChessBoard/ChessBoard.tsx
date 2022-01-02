@@ -6,14 +6,15 @@ import { BoardTile } from './BoardTile';
 import { makeMove } from '../../store/slices/chess';
 import { PawnPromotionModal } from './PawnPromotionModal';
 import { Navigation } from './Navigation';
+import { GameEndedNotification } from './GameEndedNotification';
 
 export const ChessBoard = () => {
-  const { board: stateBoard, player, moves } = useAppSelector(state => state.chess);
+  const { board: stateBoard, player, moves, status } = useAppSelector(state => state.chess);
   const dispatch = useAppDispatch();
   const [selectedTile, setSelectedTile] = useState<TileId | undefined>(undefined);
   const [availableMoves, setAvailableMoves] = useState<ChessMove[]>([]);
   const [moveOffset, setMoveOffset] = useState(0);
-  const inPlay = moveOffset === 0;
+  const inPlay = moveOffset === 0 && ['WhiteToPlay', 'BlackToPlay', 'WhiteInCheck', 'BlackInCheck'].includes(status);
   const board = useMemo(() => {
     const result = Chess.pop({
       board: stateBoard,
@@ -46,9 +47,6 @@ export const ChessBoard = () => {
       setSelectedTile(undefined);
       setAvailableMoves([]);
     } else if (!selectedTile) {
-      const isUnderAttack = Chess.tileAttacked({ board, tile, player });
-      console.log(`Tile: ${Chess.tile(tile, 'id')} - ${isUnderAttack ? 'ATTACKED' : 'safe'}`);
-
       // Get possible moves
       try {
         const possibleMoves = Chess.getAvailableMoves({ board, tile, moves })
@@ -69,7 +67,7 @@ export const ChessBoard = () => {
     const verifiedMove = availableMoves.find((mv) => mv.from === selectedTile && mv.to === tile);
     if (verifiedMove) {
       const move = { ...verifiedMove, promotion };
-      console.log('move:', { tile, move, selectedTile })
+      
       dispatch(makeMove(move));
       setSelectedTile(undefined);
       setAvailableMoves([]);
@@ -131,10 +129,10 @@ export const ChessBoard = () => {
     inPlay,
   ]);
   // TODO: Testing...
-  useEffect(() => {
-    const playerMoves = Chess.getAllPlayerMoves({ player, board, moves });
-    console.log({ playerMoves });
-  }, [player]);
+  // useEffect(() => {
+  //   const playerMoves = Chess.getAllPlayerMoves({ player, board, moves });
+  //   console.log({ playerMoves });
+  // }, [player]);
   const onNavigate = useCallback((offset: number) => {
     setMoveOffset(offset)
     if (offset !== 0) {
@@ -184,6 +182,9 @@ export const ChessBoard = () => {
         open={!!pawnPromotionTile}
         onClick={movePawnAndPromote}
         onClose={closePawnPromotion}
+      />
+      <GameEndedNotification
+        status={status}
       />
     </Box>
   )

@@ -54,6 +54,7 @@ TODO
   - [x] Checkamte validation
   - [x] Stalemate validation (Need to verify still)
   - [x] Game notation output
+  - [ ] Draw game (repition/insufficient pieces)
   - [ ] Algebraic notation to moves / board / game
   - [ ] Basic AI engine
 - [ ] UI

@@ -90,6 +90,7 @@ export type WhiteInCheckmateStatus = 'WhiteInCheckmate';
 export type BlackInCheckmateStatus = 'BlackInCheckmate';
 export type WhiteInStalemateStatus = 'WhiteInStalemate';
 export type BlackInStalemateStatus = 'BlackInStalemate';
+export type DrawGameStatus = 'DrawGame';
 export type GameStatus =
   | WhiteToPlayStatus
   | BlackToPlayStatus
@@ -98,7 +99,8 @@ export type GameStatus =
   | WhiteInCheckmateStatus
   | BlackInCheckmateStatus
   | WhiteInStalemateStatus
-  | BlackInStalemateStatus;
+  | BlackInStalemateStatus
+  | DrawGameStatus;
 export interface GameStatusParams {
   player: ChessPlayer;
   board: ChessBoard;

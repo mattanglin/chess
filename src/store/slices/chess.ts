@@ -49,7 +49,6 @@ export const chess = createSlice({
         state.player = result.player;
         state.moves.push(result.move);
         state.status = result.status;
-        console.log('STATUS:', result.status);
       } catch (error) {
         state.error = error;
         // TODO: Try to parse the error and set to notification?
