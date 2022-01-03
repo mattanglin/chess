@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Grid } from 'grommet';
-import { Chess, ChessMove, ChessPiece, ChessPlayer, PromotionPiece, TileId, WhitePlayer } from '../../services/chess';
+import { Chess, ChessMove, ChessPiece, PromotionPiece, TileId } from '../../services/chess';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { BoardTile } from './BoardTile';
 import { makeMove } from '../../store/slices/chess';
@@ -16,7 +16,6 @@ export const ChessBoard = () => {
     status,
     direction,
   } = useAppSelector(state => state.chess);
-  const [playerView, setPlayerView] = useState<ChessPlayer>(WhitePlayer);
   const dispatch = useAppDispatch();
   const [selectedTile, setSelectedTile] = useState<TileId | undefined>(undefined);
   const [availableMoves, setAvailableMoves] = useState<ChessMove[]>([]);
@@ -31,10 +30,13 @@ export const ChessBoard = () => {
     return result.board;
   }, [stateBoard, moveOffset, moves]);
   
-  const lastMoveMap = moves.length ? {
-    [moves[moves.length - moveOffset - 1].from]: moves[moves.length - moveOffset - 1],
-    [moves[moves.length - moveOffset - 1].to]: moves[moves.length - moveOffset - 1],
-  } : {};
+  const lastMoveMap = useMemo(() => {
+    const lastMove = moves[moves.length - moveOffset - 1];
+    return lastMove ? {
+      [lastMove.from]: lastMove,
+      [lastMove.to]: lastMove,
+    } : {};
+  }, [moves, moveOffset]);
   const availableMovesMap = availableMoves.reduce((agg, mv) => ({
     ...agg,
     [mv.to]: mv,
@@ -69,7 +71,7 @@ export const ChessBoard = () => {
       }
     }
 
-  }, [board, selectedTile, setSelectedTile, setAvailableMoves, moves, player]);
+  }, [board, selectedTile, setSelectedTile, setAvailableMoves, moves]);
   const movePiece = useCallback((tile: TileId, promotion?: PromotionPiece) => {
     const verifiedMove = availableMoves.find((mv) => mv.from === selectedTile && mv.to === tile);
     if (verifiedMove) {
