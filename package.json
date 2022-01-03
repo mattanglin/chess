@@ -8,7 +8,8 @@
     "static": "next build && next export",
     "start": "next start",
     "lint": "next lint",
-    "chess": "ts-node src/scripts/chess.ts"
+    "chess": "ts-node src/scripts/chess.ts",
+    "serve": "npx http-server ./out/"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.7.1",
