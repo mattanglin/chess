@@ -13,6 +13,7 @@ interface ChessState {
   gameStarted: boolean;
   board: ChessBoard;
   player: ChessPlayer;
+  direction: ChessPlayer;
   moves: ChessMove[];
   status: GameStatus;
   notification?: string;
@@ -23,6 +24,7 @@ const initialState: ChessState = {
   gameStarted: true,
   board: startingBoard,
   player: WhitePlayer,
+  direction: WhitePlayer,
   moves: [],
   status: 'WhiteToPlay',
 }
@@ -53,8 +55,11 @@ export const chess = createSlice({
         state.error = error;
         // TODO: Try to parse the error and set to notification?
       }
+    },
+    toggleDirection: (state) => {
+      state.direction = Chess.nextPlayer(state.direction);
     }
   }
 });
 
-export const { reset, makeMove } = chess.actions;
+export const { reset, makeMove, toggleDirection } = chess.actions;

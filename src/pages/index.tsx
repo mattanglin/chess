@@ -1,10 +1,10 @@
+import React, { useCallback } from 'react';
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Box, Button, Heading } from 'grommet';
 import { Layout } from '../components/Layout/Layout';
 import { Container } from '../components/Container/Container';
 import { useAppDispatch, useAppSelector } from '../store';
-import { useCallback } from 'react';
 import { reset } from '../store/slices/chess';
 import { ChessGame } from '../components/ChessGame/ChessGame';
 
@@ -21,9 +21,6 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Container>
-        <Heading level="1" textAlign="center">
-          Chess
-        </Heading>
         {gameStarted && (
           <ChessGame />
         )}

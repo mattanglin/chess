@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Grid } from 'grommet';
-import { Chess, ChessMove, ChessPiece, PromotionPiece, TileId } from '../../services/chess';
+import { Chess, ChessMove, ChessPiece, ChessPlayer, PromotionPiece, TileId, WhitePlayer } from '../../services/chess';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { BoardTile } from './BoardTile';
 import { makeMove } from '../../store/slices/chess';
@@ -9,7 +9,14 @@ import { Navigation } from './Navigation';
 import { GameEndedNotification } from './GameEndedNotification';
 
 export const ChessBoard = () => {
-  const { board: stateBoard, player, moves, status } = useAppSelector(state => state.chess);
+  const {
+    board: stateBoard,
+    player,
+    moves,
+    status,
+    direction,
+  } = useAppSelector(state => state.chess);
+  const [playerView, setPlayerView] = useState<ChessPlayer>(WhitePlayer);
   const dispatch = useAppDispatch();
   const [selectedTile, setSelectedTile] = useState<TileId | undefined>(undefined);
   const [availableMoves, setAvailableMoves] = useState<ChessMove[]>([]);
@@ -142,6 +149,38 @@ export const ChessBoard = () => {
     }
   }, [setMoveOffset]);
 
+  // Tile Rendering
+  const tiles = useMemo(() => {
+    const boardTiles: JSX.Element[] = [];
+
+    for (let rankIdx = 0; rankIdx < 8; rankIdx++) {
+      for (let fileIdx = 0; fileIdx < 8; fileIdx++) {
+        const file = direction === 'W' ? fileIdx : 7 - fileIdx;
+        const rank = direction === 'W' ? rankIdx : 7 - rankIdx;
+        const tile = Chess.tile([file, rank]);
+        const piece = board[rank][file];
+
+        boardTiles.push(
+          <BoardTile
+            key={tile}
+            id={tile}
+            onClick={resolveClickHandler({
+              piece,
+              tile,
+            })}
+            bg={(file + rank) % 2 === 0 ? 'light' : 'dark'}
+            piece={piece}
+            selected={selectedTile && selectedTile === tile}
+            available={!!availableMovesMap[tile]}
+            highlighted={!!lastMoveMap[tile]}
+          />
+        )
+      }
+    }
+
+    return boardTiles;
+  }, [board, direction, selectedTile, availableMovesMap, lastMoveMap, resolveClickHandler]);
+
   return (
     <Box>
       <Box>
@@ -157,25 +196,7 @@ export const ChessBoard = () => {
         columns={['flex', 'flex', 'flex', 'flex', 'flex', 'flex', 'flex', 'flex']}
         fill
       >
-        {board.reduce((tiles, row, rankIdx) => [
-          ...tiles,
-          ...row.reduce((rowTiles, piece, fileIdx) => [
-            ...rowTiles,
-            <BoardTile
-              key={Chess.tile([fileIdx, rankIdx])}
-              id={Chess.tile([fileIdx, rankIdx])}
-              onClick={resolveClickHandler({
-                piece,
-                tile: Chess.tile([fileIdx, rankIdx]),
-              })}
-              bg={(fileIdx + rankIdx) % 2 === 0 ? 'light' : 'dark'}
-              piece={piece}
-              selected={selectedTile && selectedTile === Chess.tile([fileIdx, rankIdx])}
-              available={!!availableMovesMap[Chess.tile([fileIdx, rankIdx])]}
-              highlighted={!!lastMoveMap[Chess.tile([fileIdx, rankIdx])]}
-            />
-          ], [] as JSX.Element[])
-        ], [] as JSX.Element[])}
+        {tiles}
       </Grid>
       <PawnPromotionModal
         player={player}
